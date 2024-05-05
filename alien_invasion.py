@@ -31,18 +31,7 @@ class AlienInvasion:
 			#Watch for keyboard and mouse events.
 			self._check_events()
 			self.ship.update()
-			self.bullets.update()
-			#python expect the list stays the same length as the loop is runing
-			#copy of the list for the loop is necessary
-			for bullet in self.bullets.copy():
-				if bullet.rect.bottom <= 0:
-					self.bullets.remove(bullet)
-			#the commented chaged bullet behavier, instead stop firing, the
-			# eralies fired bullet disaprears. make the total bullets less
-			# than self.setting.bullet_allowed
-			#if len(self.bullets) > self.settings.bullet_allowed:
-			#	self.bullets.remove(self.bullets.sprites().pop(0))
-			#print(len(self.bullets))
+			self._update_bullets()
 			self._update_screen()
 			self.clock.tick(60)
 
@@ -97,6 +86,23 @@ class AlienInvasion:
 		if len(self.bullets) < self.settings.bullet_allowed:
 			new_bullet = Bullet(self)
 			self.bullets.add(new_bullet)
+
+	def _update_bullets(self):
+		"""Update position of bullets and get rid of old bullets"""
+		# Update bullet positions.
+		self.bullets.update()
+		#python expect the list stays the same length as the loop is runing
+		#copy of the list for the loop is necessary
+		for bullet in self.bullets.copy():
+			if bullet.rect.bottom <= 0:
+				self.bullets.remove(bullet)
+		#the commented chaged bullet behavier, instead stop firing, the
+		# eralies fired bullet disaprears. make the total bullets less
+		# than self.setting.bullet_allowed
+		#if len(self.bullets) > self.settings.bullet_allowed:
+		#	self.bullets.remove(self.bullets.sprites().pop(0))
+
+
 
 
 if __name__ == "__main__":
