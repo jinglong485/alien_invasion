@@ -7,6 +7,7 @@ from bullet import Bullet
 from alien import Alien
 from game_stats import GameStats
 from button import Button
+from scoreboard import Scoreboard
 
 class AlienInvasion:
 	"""Overall class to manage game assets and behavior."""
@@ -18,6 +19,7 @@ class AlienInvasion:
 		self.settings = Settings()
 		self._init_screen()
 		self.stats = GameStats(self)
+		self.sb = Scoreboard(self)
 		self.ship = Ship(self)
 		self.bullets = pygame.sprite.Group()
 		self.aliens = pygame.sprite.Group()
@@ -73,9 +75,12 @@ class AlienInvasion:
 		"""Start a new game when the play clicks paly."""
 		button_clicked = self.play_button.rect.collidepoint(mouse_pos)
 		if button_clicked and not self.game_active:
+			self.settings.initialize_dynamic_settings()
 			#Hide the mouse cursor
 			pygame.mouse.set_visible(False)
 			self.stats.reset_stats()
+			self.sb.prep_score()
+			self.sb.prep_level()
 			self.game_active = True
 			# get rid of any remaining bullets and aliens
 			self.bullets.empty()
@@ -95,7 +100,7 @@ class AlienInvasion:
 			self.ship.moving_left = True
 		elif event.key == pygame.K_q:
 			sys.exit()
-		elif event.key == pygame.K_SPACE:
+		elif event.key == pygame.K_SPACE and self.game_active:
 			self._fire_bullet()
 
 	def _check_keyup_events(self, event):
@@ -112,6 +117,7 @@ class AlienInvasion:
 		for bullet in self.bullets.sprites():
 			bullet.draw_bullet() 
 		self.aliens.draw(self.screen)
+		self.sb.show_score()
 		# Draw the play button if the game is inactive
 		if not self.game_active:
 			self.play_button.draw_button()
@@ -149,6 +155,15 @@ class AlienInvasion:
 		if not self.aliens:
 			self.bullets.empty()
 			self._create_fleet()
+			self.settings.increase_speed()
+			self.stats.level += 1
+			self.sb.prep_level()
+		if collisions:
+			#print(collisions.values())
+			for aliens in collisions.values():
+				self.stats.score += self.settings.alien_points * len(aliens)
+			self.sb.prep_score()
+			self.sb.check_high_score()
 
 	def _create_fleet(self):
 		"""Create the fleet of aliens"""
